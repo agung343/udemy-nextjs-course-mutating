@@ -1,5 +1,6 @@
 // reseved name api handler route.js
 // GET, POST, PATCH, DELETE are reserved name function
+// update for branch 05
 
 export function GET(request) {
     console.log(request)

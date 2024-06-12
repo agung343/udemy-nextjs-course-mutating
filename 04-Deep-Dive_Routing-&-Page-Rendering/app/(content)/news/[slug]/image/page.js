@@ -1,3 +1,4 @@
+// update for brach 05
 import { notFound } from "next/navigation";
 import { DUMMY_NEWS } from "@/componets/DUMMY";
 

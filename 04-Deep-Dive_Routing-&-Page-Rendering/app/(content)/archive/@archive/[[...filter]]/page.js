@@ -1,3 +1,4 @@
+//update for branch 05
 import Link from "next/link";
 import NewsList from "@/componets/NewsList";
 import {
@@ -6,39 +7,53 @@ import {
   getAvailableNewsMonths,
   getNewsForYearAndMonth,
 } from "@/lib/news";
+import { Suspense } from "react";
 
-export default function FilteredNewsPage({ params }) {
+const FilteredNews = async ({year, month}) => {
+  let news;
+  
+  if (year && !month) {
+    news = await getNewsForYear(year)
+  } else if (year && month) {
+    news = await getNewsForYearAndMonth(year, month)
+  }
+
+   // defined news
+   let content = <p>No News found for the selected period.</p>;
+   if (news && news.length > 0) {
+     content = <NewsList newsList={news} />;
+   }
+
+   return content;
+}
+
+
+export default async function FilteredNewsPage({ params }) {
   const filter = params.filter;
   // const news = getNewsForYear(filter)
   const selectedYear = filter ? filter[0] : undefined;
   const selectedMonth = filter ? filter[1] : undefined;
 
-  let news;
-  let links = getAvailableNewsYears();
+  const availableYears = await getAvailableNewsYears();
+  let links = availableYears
 
   if (selectedYear && !selectedMonth) {
-    news = getNewsForYear(selectedYear);
     links = getAvailableNewsMonths(selectedYear);
   }
   if (selectedYear && selectedMonth) {
-    news = getNewsForYearAndMonth(selectedYear, selectedMonth);
     links = [];
   }
 
   //throwing related error
   if (
-    (selectedYear && !getAvailableNewsYears().includes(+selectedYear)) ||
+    (selectedYear && !getAvailableNewsYears().includes(selectedYear)) ||
     (selectedMonth &&
-      !getAvailableNewsMonths(selectedYear).includes(+selectedMonth))
+      !getAvailableNewsMonths(selectedYear).includes(selectedMonth))
   ) {
     throw new Error("Invalid Filter");
   }
 
-  // defined news
-  let content = <p>No News found for the selected period.</p>;
-  if (news && news.length > 0) {
-    content = <NewsList newsList={news} />;
-  }
+ 
 
   return (
     <>
@@ -58,7 +73,9 @@ export default function FilteredNewsPage({ params }) {
           </ul>
         </nav>
       </header>
-      {content}
+      <Suspense fallback={<p>Loading News...</p>}>
+        <FilteredNews year={selectedYear} month={selectedMonth} />
+      </Suspense>
     </>
   );
 }
