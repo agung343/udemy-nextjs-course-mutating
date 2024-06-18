@@ -1,3 +1,4 @@
+// bug on newslist
 import Link from "next/link"
 
 export default function NewsList({newsList}) {
